@@ -1,10 +1,23 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const initialForm = { name: '', breed: '', adopted: false }
 
 // Use this form for both POST and PUT requests!
-export default function DogForm() {
+export default function DogForm({ dog, reset, getDogs }) {
+  const navigate = useNavigate()
   const [values, setValues] = useState(initialForm)
+  const [breeds, setBreeds] = useState([])
+  useEffect(() => {
+    fetch('/api/dogs/breeds')
+      .then(res => res.json())
+      .then(breeds => setBreeds(breeds.toSorted()))
+      .catch(err => console.log(err))
+  })
+  useEffect(() => {
+    if (dog) setValues(dog)
+    else setValues(initialForm)
+  }, [dog])
   const onSubmit = (event) => {
     event.preventDefault()
   }
@@ -17,7 +30,7 @@ export default function DogForm() {
   return (
     <div>
       <h2>
-        Create Dog
+      {dog ? "Update Dog" : "Create Dog"}
       </h2>
       <form onSubmit={onSubmit}>
         <input
@@ -34,7 +47,7 @@ export default function DogForm() {
           aria-label="Dog's breed"
         >
           <option value="">---Select Breed---</option>
-          {/* Populate this dropdown using data obtained from the API */}
+          {breeds.map(br => <option key={br}>{br}</option>)}
         </select>
         <label>
           Adopted: <input
@@ -47,9 +60,9 @@ export default function DogForm() {
         </label>
         <div>
           <button type="submit">
-            Create Dog
+            {dog ? "Update Dog" : "Create Dog"}
           </button>
-          <button aria-label="Reset form">Reset</button>
+          <button onClick={reset} aria-label="Reset form">Reset</button>
         </div>
       </form>
     </div>
